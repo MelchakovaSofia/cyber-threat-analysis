@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cta-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: cta-backend
+  template:
+    metadata:
+      labels:
+        app: cta-backend
+    spec:
+      containers:
+        - name: backend
+          # Replace ${ACR_NAME} with your Azure Container Registry name
+          # Or set ACR_NAME environment variable before applying
+          image: ${ACR_NAME:-your-acr-name}.azurecr.io/cta-backend:latest
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: cta-config
+            - secretRef:
+                name: cta-secret
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          volumeMounts:
+            - name: ml-models
+              mountPath: /app/ml_models
+      volumes:
+        - name: ml-models
+          persistentVolumeClaim:
+            claimName: ml-models-pvc

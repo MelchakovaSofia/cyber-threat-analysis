@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+*.db
+*.zip
+*.joblib
+ml_models/
+.pytest_cache/
+.idea/
+.vscode/
